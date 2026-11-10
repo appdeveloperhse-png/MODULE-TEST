@@ -1,6 +1,6 @@
 #define MyAppName "HSE Management System"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "Your Company Name"
+#define MyAppPublisher "Your Company"
 #define MyAppExeName "HSE-Management-System.exe"
 
 [Setup]
@@ -13,7 +13,6 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=installer
 OutputBaseFilename=HSE-Management-System-Setup
-SetupIconFile=
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
