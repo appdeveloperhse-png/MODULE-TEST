@@ -50,12 +50,9 @@ jobs:
           }
           Get-Item "dist\HSE-Management-System.exe"
 
-      - name: Download and install Inno Setup
+      - name: Install Inno Setup
         shell: pwsh
-        run: |
-          $url = "https://jrsoftware.org/download.php/is.exe"
-          Invoke-WebRequest -Uri $url -OutFile "innosetup.exe"
-          Start-Process -FilePath "innosetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+        run: choco install innosetup -y --no-progress
 
       - name: Build Installer with Inno Setup
         shell: pwsh
