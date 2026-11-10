@@ -1,0 +1,79 @@
+name: Build HSE Management System Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Upgrade pip
+        shell: pwsh
+        run: python -m pip install --upgrade pip
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          if (Test-Path "requirements.txt") {
+            python -m pip install -r requirements.txt
+          }
+          python -m pip install pyinstaller
+
+      - name: Build EXE with PyInstaller
+        shell: pwsh
+        run: |
+          python -m PyInstaller `
+            --onefile `
+            --windowed `
+            --name "HSE-Management-System" `
+            --clean `
+            app/main.py
+
+      - name: Verify EXE was created
+        shell: pwsh
+        run: |
+          if (!(Test-Path "dist\HSE-Management-System.exe")) {
+            Write-Error "EXE was not created!"
+            exit 1
+          }
+          Get-Item "dist\HSE-Management-System.exe"
+
+      - name: Download and install Inno Setup
+        shell: pwsh
+        run: |
+          $url = "https://jrsoftware.org/download.php/is.exe"
+          Invoke-WebRequest -Uri $url -OutFile "innosetup.exe"
+          Start-Process -FilePath "innosetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait
+
+      - name: Build Installer with Inno Setup
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Verify Installer was created
+        shell: pwsh
+        run: |
+          if (!(Test-Path "installer\HSE-Management-System-Setup.exe")) {
+            Write-Error "Installer was not created!"
+            exit 1
+          }
+          Get-Item "installer\HSE-Management-System-Setup.exe"
+
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HSE-Management-System-Installer
+          path: installer/HSE-Management-System-Setup.exe
+          if-no-files-found: error
